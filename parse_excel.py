@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 from datetime import datetime
+import math
 
 def parse_excel():
     # Читаем файл, пропуская первые 3 строки (заголовок, пустая, курсы)
@@ -22,8 +23,19 @@ def parse_excel():
         else:
             date_str = date_val.strftime('%Y-%m-%d')
         
-        # Обрабатываем числовые поля
+        # Обрабатываем числовые поля, заменяем NaN на None (в JSON станет null)
+        def safe_value(val):
+            if pd.isna(val):
+                return None
+            if isinstance(val, float) and math.isnan(val):
+                return None
+            return val
+        
+        # Функция для безопасного извлечения числа
         def safe_float(val):
+            val = safe_value(val)
+            if val is None:
+                return 0.0
             try:
                 return float(val)
             except:
